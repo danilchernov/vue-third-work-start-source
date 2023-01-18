@@ -30,4 +30,3 @@ export const YEAR_IN_SEC = DAY_IN_SEC * 365;
 export const DAY_IN_MILLISEC = DAY_IN_SEC * SEC;
 
 export const TAG_SEPARATOR = "#";
-
