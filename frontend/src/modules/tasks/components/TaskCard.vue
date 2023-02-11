@@ -1,7 +1,7 @@
 <template>
   <app-drop @drop="$emit('drop', $event)">
     <app-drag :transfer-data="task">
-      <div class="task">
+      <div class="task" @click="router.push({ path: `/${task.id}` })">
         <div v-if="task.user" class="task__user">
           <div class="task__avatar">
             <img
@@ -38,6 +38,8 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+
 import AppDrag from "@/common/components/AppDrag.vue";
 import AppDrop from "@/common/components/AppDrop.vue";
 import TaskCardTags from "./TaskCardTags.vue";
@@ -52,6 +54,8 @@ const props = defineProps({
 });
 
 defineEmits(["drop"]);
+
+const router = useRouter();
 </script>
 
 <style lang="scss" scoped>
