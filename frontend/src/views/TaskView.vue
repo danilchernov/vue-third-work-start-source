@@ -79,7 +79,12 @@
         </div>
       </div>
 
-      <!--Чек-лист-->
+      <div
+        v-if="task && task.ticks && task.ticks.length"
+        class="task-card__block"
+      >
+        <task-card-view-ticks-list :ticks="task.ticks" disabled />
+      </div>
 
       <div
         v-if="task && task.tags && task.tags.length"
@@ -99,7 +104,9 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTaskCardDate } from "@/common/composables";
 import { getReadableDate, getImage } from "@/common/helpers";
+
 import TaskCardTags from "@/modules/tasks/components/TaskCardTags.vue";
+import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
 
 const props = defineProps({
   tasks: {
