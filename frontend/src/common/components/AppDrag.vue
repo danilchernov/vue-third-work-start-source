@@ -10,14 +10,14 @@
 </template>
 
 <script setup>
-import { DATA_TRANSFER_PAYLOAD, MOVE } from '../constants'
+import { DATA_TRANSFER_PAYLOAD, MOVE } from "../constants";
 
 const props = defineProps({
   transferData: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 function onDrag({ dataTransfer }) {
   dataTransfer.effectAllowed = MOVE;

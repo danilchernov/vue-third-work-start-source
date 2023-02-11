@@ -1,9 +1,15 @@
 <template>
   <!--  Отслеживает в какую колонку передана задача-->
-  <app-drop class="backlog" :class="{ 'backlog--hide': state.backlogIsHidden }" @drop="moveTask">
-    
+  <app-drop
+    class="backlog"
+    :class="{ 'backlog--hide': state.backlogIsHidden }"
+    @drop="moveTask"
+  >
     <!--  Отвечает за открытие/закрытие беклога-->
-    <button class="backlog__title" @click="state.backlogIsHidden = !state.backlogIsHidden">
+    <button
+      class="backlog__title"
+      @click="state.backlogIsHidden = !state.backlogIsHidden"
+    >
       <span> Бэклог </span>
     </button>
 
@@ -12,7 +18,12 @@
         <div class="backlog__collapse">
           <div class="backlog__user">
             <div class="backlog__account">
-              <img src="@/assets/img/user6.jpg" alt="Ваш аватар" width="32" height="32" />
+              <img
+                src="@/assets/img/user6.jpg"
+                alt="Ваш аватар"
+                width="32"
+                height="32"
+              />
               Игорь Пятин
             </div>
 
@@ -23,8 +34,13 @@
 
           <div class="backlog__target-area">
             <!--  Задачи в беклоге-->
-            <task-card v-for="task in sidebarTasks" :key="task.id" :task="task" class="backlog__task"
-              @drop="moveTask($event, task)" />
+            <task-card
+              v-for="task in sidebarTasks"
+              :key="task.id"
+              :task="task"
+              class="backlog__task"
+              @drop="moveTask($event, task)"
+            />
           </div>
         </div>
       </div>
@@ -51,7 +67,9 @@ const state = reactive({ backlogIsHidden: false });
 
 // Фильтруем задачи, которые относятся к беклогу (columnId === null)
 const sidebarTasks = computed(() => {
-  return props.tasks.filter((task) => !task.columnId).sort((a, b) => a.sortOrder - b.sortOrder);
+  return props.tasks
+    .filter((task) => !task.columnId)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 });
 
 const emits = defineEmits(["updateTasks"]);

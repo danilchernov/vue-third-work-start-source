@@ -1,7 +1,15 @@
 <template>
-  <app-layout :tasks="filteredTasks" :filters="state.filters" @update-tasks="updateTasks">
-    <home-view :tasks="filteredTasks" :filters="state.filters" @update-tasks="updateTasks"
-      @apply-filters="applyFilters" />
+  <app-layout
+    :tasks="filteredTasks"
+    :filters="state.filters"
+    @update-tasks="updateTasks"
+  >
+    <home-view
+      :tasks="filteredTasks"
+      :filters="state.filters"
+      @update-tasks="updateTasks"
+      @apply-filters="applyFilters"
+    />
   </app-layout>
 </template>
 
@@ -21,17 +29,26 @@ const state = reactive({
 });
 
 const filteredTasks = computed(() => {
-  const filtersAreEmpty = Object.values(state.filters).every((value) => !value.length);
+  const filtersAreEmpty = Object.values(state.filters).every(
+    (value) => !value.length
+  );
   if (filtersAreEmpty) {
     // Вернуть все задачи если фильтры не применены
     return state.tasks;
   }
   // Применить фильтр по поиску
-  const searchFilter = (task) => task.title.toLowerCase().includes(state.filters.search.toLowerCase().trim());
+  const searchFilter = (task) =>
+    task.title
+      .toLowerCase()
+      .includes(state.filters.search.toLowerCase().trim());
   // Применить фильтр по пользователям
-  const usersFilter = (task) => state.filters.users.some((userId) => userId === task.userId);
+  const usersFilter = (task) =>
+    state.filters.users.some((userId) => userId === task.userId);
   // Применить фильтр по статусам
-  const statusesFilter = (task) => state.filters.statuses.some((el) => el === task.status || el === task.timeStatus);
+  const statusesFilter = (task) =>
+    state.filters.statuses.some(
+      (el) => el === task.status || el === task.timeStatus
+    );
   // Обработать задачи в соответствии с фильтрами
   return state.tasks.filter((task) => {
     let result = {
@@ -39,7 +56,9 @@ const filteredTasks = computed(() => {
       users: usersFilter,
       statuses: statusesFilter,
     };
-    return Object.entries(result).every(([key, callback]) => !state.filters[key].length || callback(task));
+    return Object.entries(result).every(
+      ([key, callback]) => !state.filters[key].length || callback(task)
+    );
   });
 });
 

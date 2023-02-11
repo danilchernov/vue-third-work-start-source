@@ -1,33 +1,33 @@
 <template>
   <div class="app_layout">
-    <app-layout-header/>
+    <app-layout-header />
     <div class="content">
       <app-layout-sidebar
-          :tasks="props.tasks"
-          :filters="props.filters"
-          @update-tasks="$emit('updateTasks', $event)"
+        :tasks="props.tasks"
+        :filters="props.filters"
+        @update-tasks="$emit('updateTasks', $event)"
       />
-      <slot/>
+      <slot />
     </div>
   </div>
 </template>
 
 <script setup>
-import AppLayoutHeader from './AppLayoutHeader.vue'
-import AppLayoutSidebar from './AppLayoutSidebar.vue'
+import AppLayoutHeader from "./AppLayoutHeader.vue";
+import AppLayoutSidebar from "./AppLayoutSidebar.vue";
 
 const props = defineProps({
   tasks: {
     type: Array,
-    required: true
+    required: true,
   },
   filters: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-defineEmits(['updateTasks'])
+defineEmits(["updateTasks"]);
 </script>
 
 <style lang="scss" scoped>

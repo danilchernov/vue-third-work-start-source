@@ -4,38 +4,54 @@
       <div class="task">
         <div v-if="task.user" class="task__user">
           <div class="task__avatar">
-            <img :src="getImage(task.user.avatar)" alt="Аватар пользователя" width="20" height="20" />
+            <img
+              :src="getImage(task.user.avatar)"
+              alt="Аватар пользователя"
+              width="20"
+              height="20"
+            />
           </div>
           {{ task.user.name }}
         </div>
         <div class="task__statuses">
-          <span v-if="task.status" class="task__status" :class="`task__status--${task.status}`" />
-          <span v-if="task.timeStatus" class="task__status" :class="`task__status--${task.timeStatus}`" />
+          <span
+            v-if="task.status"
+            class="task__status"
+            :class="`task__status--${task.status}`"
+          />
+          <span
+            v-if="task.timeStatus"
+            class="task__status"
+            :class="`task__status--${task.timeStatus}`"
+          />
         </div>
         <h5 class="task__title" :class="{ 'task__title--first': !task.user }">
           {{ task.title }}
         </h5>
-        <task-card-tags v-if="task.tags && task.tags.length" :tags="task.tags" />
+        <task-card-tags
+          v-if="task.tags && task.tags.length"
+          :tags="task.tags"
+        />
       </div>
     </app-drag>
   </app-drop>
 </template>
 
 <script setup>
-import AppDrag from '@/common/components/AppDrag.vue';
-import AppDrop from '@/common/components/AppDrop.vue';
-import TaskCardTags from './TaskCardTags.vue';
+import AppDrag from "@/common/components/AppDrag.vue";
+import AppDrop from "@/common/components/AppDrop.vue";
+import TaskCardTags from "./TaskCardTags.vue";
 
-import { getImage } from '@/common/helpers'
+import { getImage } from "@/common/helpers";
 
 const props = defineProps({
   task: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-defineEmits(['drop'])
+defineEmits(["drop"]);
 </script>
 
 <style lang="scss" scoped>
