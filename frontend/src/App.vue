@@ -10,6 +10,8 @@
       @update-tasks="updateTasks"
       @apply-filters="applyFilters"
       @add-task="addTask"
+      @edit-task="editTask"
+      @delete-task="deleteTask"
     />
   </app-layout>
 </template>
@@ -109,6 +111,21 @@ function addTask(task) {
   }
   // Добавляем задачу в массив
   state.tasks = [...state.tasks, newTask];
+}
+
+function editTask(task) {
+  const index = state.tasks.findIndex(({ id }) => task.id === id);
+  if (~index) {
+    const newTask = normalizeTask(task);
+    if (newTask.userId) {
+      newTask.user = { ...getTaskUserById(newTask.userId) };
+    }
+    state.tasks.splice(index, 1, newTask);
+  }
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter((task) => task.id !== id);
 }
 </script>
 
