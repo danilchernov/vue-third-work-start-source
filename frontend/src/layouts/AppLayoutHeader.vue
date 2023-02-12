@@ -16,7 +16,9 @@
       <button type="submit">Найти</button>
     </form>
 
-    <a href="#" class="header__create-task">Создать карточку</a>
+    <router-link to="/tasks/create" class="header__create-task"
+      >Создать карточку</router-link
+    >
 
     <a href="#" class="header__user">
       <img

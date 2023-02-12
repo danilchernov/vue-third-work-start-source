@@ -9,6 +9,7 @@
       :filters="state.filters"
       @update-tasks="updateTasks"
       @apply-filters="applyFilters"
+      @add-task="addTask"
     />
   </app-layout>
 </template>
@@ -18,6 +19,7 @@ import { reactive, computed } from "vue";
 import { AppLayout } from "@/layouts";
 import { normalizeTask } from "./common/helpers";
 
+import users from "./mocks/users.json";
 import tasks from "./mocks/tasks.json";
 
 const state = reactive({
@@ -85,6 +87,28 @@ function applyFilters({ item, entity }) {
     ~itemIndex ? resultValues.splice(itemIndex, 1) : resultValues.push(item);
     state.filters[entity] = resultValues;
   }
+}
+
+function getTaskUserById(id) {
+  return users.find((user) => user.id === id);
+}
+
+// Создаём новую задачу и добавляем в массив задач
+function addTask(task) {
+  // Нормализуем задачу
+  const newTask = normalizeTask(task);
+  // Добавляем идентификатор, последний элемент в списке задач
+  // После подключения сервера идентификатор будет присваиваться сервером
+  newTask.id = state.tasks.length + 1;
+  // Добавляем задачу в конец списка задач в бэклоге
+  newTask.sortOrder = state.tasks.filter((task) => !task.columnId).length;
+  // Если задаче присвоен исполнитель, то добавляем объект пользователя в задачу
+  // Это будет добавлено сервером позже
+  if (newTask.userId) {
+    newTask.user = { ...getTaskUserById(newTask.userId) };
+  }
+  // Добавляем задачу в массив
+  state.tasks = [...state.tasks, newTask];
 }
 </script>
 
