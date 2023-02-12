@@ -114,6 +114,7 @@
 
       <div class="task-card__block">
         <!-- Компонент создания тегов-->
+        <TaskCardCreatorTags :tags="task.tags" @setTags="setTags" />
       </div>
 
       <!-- Блок сохранения и отмены изменений-->
@@ -139,6 +140,7 @@
 import { ref, onMounted, watch } from "vue";
 import TaskCardCreatorUserSelector from "./TaskCardCreatorUserSelector.vue";
 import TaskCardCreatorDueDateSelector from "./TaskCardCreatorDueDateSelector.vue";
+import TaskCardCreatorTags from "./TaskCardCreatorTags.vue";
 import TaskCardViewTicksList from "./TaskCardViewTicksList.vue";
 import AppButton from "@/common/components/AppButton.vue";
 import { useRouter } from "vue-router";
