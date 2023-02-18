@@ -7,7 +7,6 @@ import { useUsersStore } from "@/stores/users";
 export const useTasksStore = defineStore("tasks", {
   state: () => ({
     tasks: [],
-    filteredTasks: [],
   }),
   getters: {
     filteredTasks: (state) => {

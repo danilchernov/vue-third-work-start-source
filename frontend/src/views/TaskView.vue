@@ -9,20 +9,20 @@
     <section class="task-card__wrapper">
       <button class="task-card__close" type="button" @click="closeDialog" />
 
-      <!--Шапка задачи-->
       <div class="task-card__block">
         <div class="task-card__row">
           <h1 class="task-card__name task-card__name--min">
             {{ task ? task.title : "" }}
           </h1>
-          <!--Кнопка редактирования задачи-->
+
           <a
             class="task-card__edit"
             @click="
-              router.push({
-                name: 'TaskEdit',
-                params: { id: $route.params.id },
-              })
+              () =>
+                router.push({
+                  name: 'TaskEdit',
+                  params: { id: $route.params.id },
+                })
             "
           >
             Редактировать задачу
@@ -32,7 +32,7 @@
           {{ useTaskCardDate(task) }}
         </p>
       </div>
-      <!--Участник задачи и срок выполнения-->
+
       <div class="task-card__block">
         <ul class="task-card__params">
           <div class="task-card__block">
@@ -50,7 +50,7 @@
                   </button>
                 </div>
               </li>
-              <!--Срок выполнения-->
+
               <li v-if="dueDate">
                 Срок:
                 <button type="button" class="task-card__date-link">
@@ -61,14 +61,14 @@
           </div>
         </ul>
       </div>
-      <!--Описание задачи-->
+
       <div class="task-card__block">
         <div v-if="task && task.description" class="task-card__description">
           <h4 class="task-card__title">Описание</h4>
           <p>{{ task.description }}</p>
         </div>
       </div>
-      <!--Дополнительная ссылка-->
+
       <div v-if="task && task.url" class="task-card__block task-card__links">
         <h4 class="task-card__title">Ссылки</h4>
 
@@ -111,19 +111,16 @@ import { useRoute, useRouter } from "vue-router";
 import { useTaskCardDate } from "@/common/composables";
 import { getReadableDate, getImage } from "@/common/helpers";
 
+import { useTasksStore } from "@/stores";
+
 import TaskCardTags from "@/modules/tasks/components/TaskCardTags.vue";
 import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
 import TaskCardViewComments from "@/modules/tasks/components/TaskCardViewComments.vue";
 
-const props = defineProps({
-  tasks: {
-    type: Array,
-    required: true,
-  },
-});
+const tasksStore = useTasksStore();
 
 const task = computed(() => {
-  return props.tasks.find((task) => task.id == route.params.id);
+  return tasksStore.tasks.find((task) => task.id == route.params.id);
 });
 
 const dueDate = computed(() => {
@@ -147,7 +144,6 @@ const addCommentToList = function (comment) {
 };
 
 onMounted(() => {
-  // Фокусируемся на диалоговом окне, чтобы сработала клавиша Esc без дополнительного клика на окне
   dialog.value.focus();
 });
 </script>

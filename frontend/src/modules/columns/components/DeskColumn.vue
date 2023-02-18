@@ -23,7 +23,7 @@
       <app-icon
         v-if="!state.isInputShowed && !columnTasks.length"
         class="icon--trash"
-        @click="$emit('delete', column.id)"
+        @click="() => $emit('delete', column.id)"
       />
     </h2>
 
@@ -33,7 +33,7 @@
         :key="task.id"
         :task="task"
         class="column__task"
-        @drop="moveTask($event, task)"
+        @drop="($event) => moveTask($event, task)"
       />
     </div>
   </app-drop>
@@ -41,32 +41,34 @@
 
 <script setup>
 import { reactive, computed, nextTick, ref } from "vue";
-import AppDrop from "@/common/components/AppDrop.vue";
-import AppIcon from "@/common/components/AppIcon.vue";
-import TaskCard from "@/modules/tasks/components/TaskCard.vue";
 
 import { getTargetColumnTasks, addActive } from "@/common/helpers";
+import AppDrop from "@/common/components/AppDrop.vue";
+import AppIcon from "@/common/components/AppIcon.vue";
+
+import { useTasksStore } from "@/stores";
+import TaskCard from "@/modules/tasks/components/TaskCard.vue";
 
 const props = defineProps({
   column: {
     type: Object,
     required: true,
   },
-  tasks: {
-    type: Array,
-    required: true,
-  },
 });
 
+const emits = defineEmits(["update", "delete"]);
+
+const tasksStore = useTasksStore();
+
 const columnTitle = ref(null);
+
 const state = reactive({
   isInputShowed: false,
   columnTitle: props.column.title,
 });
-const emits = defineEmits(["update", "delete", "updateTasks"]);
 
 const columnTasks = computed(() => {
-  return props.tasks
+  return tasksStore.filteredTasks
     .filter((task) => task.columnId === props.column.id)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 });
@@ -99,7 +101,7 @@ function moveTask(active, toTask) {
 
   const toColumnId = props.column ? props.column.id : null;
   // Получить задачи для текущей колонки
-  const targetColumnTasks = getTargetColumnTasks(toColumnId, props.tasks);
+  const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
   const activeClone = { ...active, columnId: toColumnId };
   // Добавить активную задачу в колонку
   const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
@@ -112,7 +114,8 @@ function moveTask(active, toTask) {
       tasksToUpdate.push(newTask);
     }
   });
-  emits("updateTasks", tasksToUpdate);
+
+  tasksStore.updateTasks(tasksToUpdate);
 }
 </script>
 

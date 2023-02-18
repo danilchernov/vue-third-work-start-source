@@ -113,11 +113,9 @@
       </div>
 
       <div class="task-card__block">
-        <!-- Компонент создания тегов-->
         <TaskCardCreatorTags :tags="task.tags" @setTags="setTags" />
       </div>
 
-      <!-- Блок сохранения и отмены изменений-->
       <div class="task-card__buttons">
         <AppButton class="button--border" @click="closeDialog">
           Отменить
@@ -140,8 +138,8 @@
 import { ref, onMounted, watch } from "vue";
 import TaskCardCreatorUserSelector from "./TaskCardCreatorUserSelector.vue";
 import TaskCardCreatorDueDateSelector from "./TaskCardCreatorDueDateSelector.vue";
-import TaskCardCreatorTags from "./TaskCardCreatorTags.vue";
 import TaskCardViewTicksList from "./TaskCardViewTicksList.vue";
+import TaskCardCreatorTags from "./TaskCardCreatorTags.vue";
 import AppButton from "@/common/components/AppButton.vue";
 import { useRouter } from "vue-router";
 import { createUUIDv4, createNewDate } from "@/common/helpers";
@@ -150,6 +148,7 @@ import taskStatuses from "@/common/enums/taskStatuses";
 import { validateFields } from "@/common/validator";
 import { useTaskCardDate } from "@/common/composables";
 import { cloneDeep } from "lodash";
+import { useTasksStore } from "@/stores";
 // Функция для создания новых задач
 const createNewTask = () => ({
   userId: null,
@@ -188,7 +187,8 @@ const props = defineProps({
     default: null,
   },
 });
-const emits = defineEmits(["addTask", "editTask", "deleteTask"]);
+// Определяем хранилище задач
+const tasksStore = useTasksStore();
 // Определяем если мы работаем над редактированием задачи или создаем новую
 const taskToWork = props.taskToEdit
   ? cloneDeep(props.taskToEdit)
@@ -216,7 +216,7 @@ function closeDialog() {
   router.push("/");
 }
 function deleteTask() {
-  emits("deleteTask", task.value.id);
+  tasksStore.deleteTask(task.value.id);
   router.push("/");
 }
 function setStatus(status) {
@@ -267,10 +267,10 @@ function submit() {
   }
   if (props.taskToEdit) {
     // Редактируемая задача
-    emits("editTask", task.value);
+    tasksStore.editTask(task.value);
   } else {
     // Новая задача
-    emits("addTask", task.value);
+    tasksStore.addTask(task.value);
   }
   // Переход на главную страницу
   router.push("/");
