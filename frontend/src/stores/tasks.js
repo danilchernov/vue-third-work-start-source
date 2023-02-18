@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-
+import tasks from "@/mocks/tasks.json";
+import { normalizeTask } from "../common/helpers";
 import { useFiltersStore } from "@/stores/filters";
 import { useUsersStore } from "@/stores/users";
 
@@ -56,5 +57,45 @@ export const useTasksStore = defineStore("tasks", {
         .sort((a, b) => a.sortOrder - b.sortOrder);
     },
   },
-  actions: {},
+  actions: {
+    async fetchTasks() {
+      this.tasks = tasks.map((task) => normalizeTask(task));
+    },
+    updateTasks(tasksToUpdate) {
+      tasksToUpdate.forEach((task) => {
+        const index = this.tasks.findIndex(({ id }) => id === task.id);
+
+        if (~index) {
+          this.tasks.splice(index, 1, task);
+        }
+      });
+    },
+    addTask(task) {
+      const newTask = normalizeTask(task);
+      newTask.id = this.tasks.length + 1;
+      newTask.sortOrder = this.tasks.filter((task) => !task.columnId).length;
+
+      if (newTask.userId) {
+        newTask.user = { ...this.getTaskUserById(newTask.userId) };
+      }
+
+      this.tasks = [...this.tasks, newTask];
+    },
+    editTask(task) {
+      const index = this.tasks.findIndex(({ id }) => task.id === id);
+
+      if (~index) {
+        const newTask = normalizeTask(task);
+
+        if (newTask.userId) {
+          newTask.user = { ...this.getTaskUserById(newTask.userId) };
+        }
+
+        this.tasks.splice(index, 1, newTask);
+      }
+    },
+    deleteTask(id) {
+      this.tasks = this.tasks.filter((task) => task.id !== id);
+    },
+  },
 });
