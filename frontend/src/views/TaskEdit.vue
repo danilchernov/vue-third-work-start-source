@@ -8,6 +8,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { createNewDate } from "../common/helpers";
 import { useTasksStore } from "@/stores";
@@ -17,8 +18,9 @@ const route = useRoute();
 const router = useRouter();
 const tasksStore = useTasksStore();
 
-const task = tasksStore.tasks.find((task) => +task.id === +route.params.id);
-
+const task = computed(() => {
+  return tasksStore.getTaskById(route.params.id);
+});
 if (task) {
   const taskDate = task.dueDate;
   task.dueDate = taskDate ? new Date(taskDate) : createNewDate();

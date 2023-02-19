@@ -136,20 +136,22 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { createUUIDv4, createNewDate } from "@/common/helpers";
+import { cloneDeep } from "lodash";
+
+import { STATUSES } from "@/common/constants";
+import taskStatuses from "@/common/enums/taskStatuses";
+import { useTaskCardDate } from "@/common/composables";
+import { validateFields } from "@/common/validator";
+import { useTasksStore, useTicksStore } from "@/stores";
+
+import AppButton from "@/common/components/AppButton.vue";
 import TaskCardCreatorUserSelector from "./TaskCardCreatorUserSelector.vue";
 import TaskCardCreatorDueDateSelector from "./TaskCardCreatorDueDateSelector.vue";
 import TaskCardViewTicksList from "./TaskCardViewTicksList.vue";
 import TaskCardCreatorTags from "./TaskCardCreatorTags.vue";
-import AppButton from "@/common/components/AppButton.vue";
-import { useRouter } from "vue-router";
-import { createUUIDv4, createNewDate } from "@/common/helpers";
-import { STATUSES } from "@/common/constants";
-import taskStatuses from "@/common/enums/taskStatuses";
-import { validateFields } from "@/common/validator";
-import { useTaskCardDate } from "@/common/composables";
-import { cloneDeep } from "lodash";
-import { useTasksStore } from "@/stores";
-// Функция для создания новых задач
+
 const createNewTask = () => ({
   userId: null,
   columnId: null,
@@ -163,13 +165,14 @@ const createNewTask = () => ({
   ticks: [],
   tags: "",
 });
+
 const createNewTick = () => ({
-  // Добавляем временный идентификатор до момента отправки на сервер
   uuid: createUUIDv4(),
   taskId: null,
   text: "",
   done: false,
 });
+
 const setEmptyValidations = () => ({
   title: {
     error: "",
@@ -180,25 +183,28 @@ const setEmptyValidations = () => ({
     rules: ["url"],
   },
 });
+
 const router = useRouter();
+const tasksStore = useTasksStore();
+const ticksStore = useTicksStore();
+
 const props = defineProps({
   taskToEdit: {
     type: Object,
     default: null,
   },
 });
-// Определяем хранилище задач
-const tasksStore = useTasksStore();
-// Определяем если мы работаем над редактированием задачи или создаем новую
+
 const taskToWork = props.taskToEdit
   ? cloneDeep(props.taskToEdit)
   : createNewTask();
+
 const task = ref(taskToWork);
 const validations = ref(setEmptyValidations());
 const isFormValid = ref(true);
 const statusList = ref(STATUSES.slice(0, 3));
 const dialog = ref(null);
-// Отслеживаем изменения в задаче чтобы сбросить ошибки валидации
+
 watch(
   task,
   () => {
@@ -207,14 +213,15 @@ watch(
   },
   { deep: true }
 );
+
 onMounted(() => {
-  // Фокусируем на диалоговом окне чтобы сработала клавиша esc без дополнительного клика на окне
   dialog.value.focus();
 });
+
 function closeDialog() {
-  // Закрытие диалога всего лишь переход на корневой маршрут
   router.push("/");
 }
+
 function deleteTask() {
   tasksStore.deleteTask(task.value.id);
   router.push("/");
@@ -248,32 +255,52 @@ function updateTick(tick) {
     task.value.ticks.splice(index, 1, tick);
   }
 }
+function setTags(tags) {
+  task.value.tags = tags;
+}
+
 function removeTick({ uuid, id }) {
   if (uuid) {
     task.value.ticks = task.value.ticks.filter((tick) => tick.uuid !== uuid);
   }
   if (id) {
     task.value.ticks = task.value.ticks.filter((tick) => tick.id !== id);
+    ticksStore.deleteTick(id);
   }
 }
-function setTags(tags) {
-  task.value.tags = tags;
-}
-function submit() {
-  // Валидируем задачу
+
+async function submit() {
   if (!validateFields(task.value, validations.value)) {
     isFormValid.value = false;
     return;
   }
+
+  let taskId = task.value.id;
+
   if (props.taskToEdit) {
-    // Редактируемая задача
-    tasksStore.editTask(task.value);
+    await tasksStore.editTask(task.value);
   } else {
-    // Новая задача
-    tasksStore.addTask(task.value);
+    const newTask = await tasksStore.addTask(task.value);
+    taskId = newTask.id;
   }
-  // Переход на главную страницу
-  router.push("/");
+
+  await submitTicks(taskId, task.value.ticks);
+  await router.push("/");
+}
+
+async function submitTicks(taskId, ticks) {
+  const promises = ticks.map((tick) => {
+    if (!tick.text) {
+      return;
+    }
+
+    delete tick.uuid;
+
+    tick.taskId = taskId;
+
+    return tick.id ? ticksStore.updateTick(tick) : ticksStore.addTick(tick);
+  });
+  await Promise.all(promises);
 }
 </script>
 

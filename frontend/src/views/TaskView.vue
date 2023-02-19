@@ -16,6 +16,7 @@
           </h1>
 
           <a
+            v-if="authStore.getUserAttribute('isAdmin')"
             class="task-card__edit"
             @click="
               () =>
@@ -37,13 +38,12 @@
         <ul class="task-card__params">
           <div class="task-card__block">
             <ul class="task-card__params">
-              <!--Участник задачи-->
               <li v-if="task && task.user">
                 Участник:
                 <div class="task-card__participant">
                   <button type="button" class="task-card__user">
                     <img
-                      :src="getImage(task.user.avatar)"
+                      :src="getPublicImage(task.user.avatar)"
                       :alt="task.user.name"
                     />
                     {{ task.user.name }}
@@ -109,26 +109,26 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTaskCardDate } from "@/common/composables";
-import { getReadableDate, getImage } from "@/common/helpers";
+import { getReadableDate, getPublicImage } from "@/common/helpers";
 
-import { useTasksStore } from "@/stores";
+import { useAuthStore, useTasksStore } from "@/stores";
 
 import TaskCardTags from "@/modules/tasks/components/TaskCardTags.vue";
 import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
 import TaskCardViewComments from "@/modules/tasks/components/TaskCardViewComments.vue";
 
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
 const tasksStore = useTasksStore();
 
 const task = computed(() => {
-  return tasksStore.tasks.find((task) => task.id == route.params.id);
+  return tasksStore.getTaskById(route.params.id);
 });
 
 const dueDate = computed(() => {
-  return getReadableDate(task.value.dueDate || "");
+  return getReadableDate(task.dueDate || "");
 });
-
-const router = useRouter();
-const route = useRoute();
 
 const closeDialog = function () {
   router.push("/");
@@ -137,10 +137,11 @@ const closeDialog = function () {
 const dialog = ref(null);
 
 const addCommentToList = function (comment) {
-  if (!task.value.comments) {
-    task.value.comments = [];
+  if (!task.comments) {
+    task.comments = [];
   }
-  task.value.comments.push(comment);
+
+  task.comments.push(comment);
 };
 
 onMounted(() => {

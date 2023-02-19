@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useUsersStore, useFiltersStore } from "@/stores";
+import { useUsersStore, useFiltersStore, useTicksStore } from "@/stores";
 import { tasksService } from "@/services";
 
 export const useTasksStore = defineStore("tasks", {
@@ -52,6 +52,19 @@ export const useTasksStore = defineStore("tasks", {
       return state.filteredTasks
         .filter((task) => !task.columnId)
         .sort((a, b) => a.sortOrder - b.sortOrder);
+    },
+    getTaskById: (state) => (id) => {
+      const ticksStore = useTicksStore();
+      const usersStore = useUsersStore();
+
+      const task = state.tasks.find((task) => task.id == id);
+
+      if (!task) return null;
+
+      task.ticks = ticksStore.getTicksByTaskId(task.id);
+      task.user = usersStore.users.find((user) => user.id === task.userId);
+
+      return task;
     },
   },
   actions: {
