@@ -2,7 +2,6 @@
   <div class="task-card__comments">
     <h2 class="task-card__title">Комментарии</h2>
     <div class="comments">
-      <!--      Список комментариев-->
       <ul class="comments__list">
         <li
           v-for="comment in comments"
@@ -11,7 +10,7 @@
         >
           <div class="comments__user">
             <img
-              :src="getImage(comment.user.avatar)"
+              :src="getPublicImage(comment.user.avatar)"
               :alt="comment.user.name"
               width="30"
               height="30"
@@ -22,7 +21,6 @@
         </li>
       </ul>
 
-      <!--      Блок добавления нового комментария-->
       <form v-if="user" action="#" class="comments__form" method="post">
         <app-textarea
           v-model="newComment"
@@ -44,25 +42,27 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-import users from "@/mocks/users.json";
 import {
   validateFields,
   clearValidationErrors,
 } from "../../../common/validator";
 import AppTextarea from "@/common/components/AppTextarea.vue";
 import AppButton from "@/common/components/AppButton.vue";
-import { getImage } from "@/common/helpers";
+import { getPublicImage } from "@/common/helpers";
+import { useAuthStore, useCommentsStore } from "@/stores";
+
+const authStore = useAuthStore();
+const commentsStore = useCommentsStore();
+
 const props = defineProps({
   taskId: {
     type: Number,
     required: true,
   },
-  comments: {
-    type: Array,
-    default: () => [],
-  },
 });
+
 const emits = defineEmits(["createNewComment"]);
+
 const newComment = ref("");
 const validations = ref({
   newComment: {
@@ -70,31 +70,27 @@ const validations = ref({
     rules: ["required"],
   },
 });
-// Позже будет добавлен залогиненый пользователь. До этого будем использовать первого пользователя в списке
-const user = computed(() => users[0]);
-// Отслеживаем значение поля комментария и очищаем ошибку при изменении
+
+const user = authStore.user;
+const comments = computed(() => {
+  return commentsStore.getCommentsByTaskId(props.taskId);
+});
+
 watch(newComment, () => {
   if (validations.value.newComment.error) {
     clearValidationErrors(validations.value);
   }
 });
-const submit = function () {
-  // Проверяем валидно ли поле комментария
+
+const submit = async function () {
   if (!validateFields({ newComment }, validations.value)) return;
-  // Создаем объект комментария
   const comment = {
     text: newComment.value,
     taskId: props.taskId,
-    userId: user.value.id,
-    user: {
-      id: user.value.id,
-      name: user.value.name,
-      avatar: user.value.avatar,
-    },
+    userId: user.id,
   };
-  // Отправляем комментарий в родительский компонент
-  emits("createNewComment", comment);
-  // Очищаем поле комментария
+
+  await commentsStore.addComment(comment);
   newComment.value = "";
 };
 </script>

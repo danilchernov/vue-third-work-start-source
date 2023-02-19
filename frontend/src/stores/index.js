@@ -3,3 +3,4 @@ export { useFiltersStore } from "./filters";
 export { useUsersStore } from "./users";
 export { useTasksStore } from "./tasks";
 export { useAuthStore } from "./auth";
+export { useCommentsStore } from "./comments";
