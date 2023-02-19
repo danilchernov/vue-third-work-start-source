@@ -6,6 +6,14 @@ export default [
     meta: { layout: "AppLayoutMain" },
     children: [
       {
+        path: "/login",
+        name: "Login",
+        component: () => import("../views/AppLogin.vue"),
+        meta: {
+          layout: "AppLayoutDefault",
+        },
+      },
+      {
         path: "/:id",
         name: "TaskView",
         component: () => import("../views/TaskView.vue"),

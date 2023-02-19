@@ -1,6 +1,6 @@
 <template>
   <div
-    :draggable="true"
+    :draggable="authStore.isAuthenticated"
     @dragstart.self="onDrag"
     @dragover.prevent
     @dragenter.prevent
@@ -10,7 +10,10 @@
 </template>
 
 <script setup>
+import { useAuthStore } from "@/stores";
 import { DATA_TRANSFER_PAYLOAD, MOVE } from "../constants";
+
+const authStore = useAuthStore();
 
 const props = defineProps({
   transferData: {

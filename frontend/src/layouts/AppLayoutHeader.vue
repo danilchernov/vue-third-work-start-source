@@ -18,48 +18,73 @@
         required
         placeholder="Поиск"
         @input="
-          filtersStore.applyFilters({
-            item: $event.target.value,
-            entity: 'search',
-          })
+          ($event) =>
+            filtersStore.applyFilters({
+              item: $event.target.value,
+              entity: 'search',
+            })
         "
       />
       <button type="submit">Найти</button>
     </form>
 
-    <router-link to="/tasks/create" class="header__create-task"
-      >Создать карточку</router-link
+    <router-link
+      v-if="authStore.getUserAttribute('isAdmin')"
+      to="/tasks/create"
+      class="header__create-task"
     >
+      Создать карточку
+    </router-link>
 
-    <a href="#" class="header__user">
-      <img
-        src="@/assets/img/admin.jpg"
-        alt="Администратор"
-        width="40"
-        height="40"
-      />
+    <a
+      v-if="authStore.user"
+      href="#"
+      class="header__user"
+      @click.stop="toggleUserMenu"
+    >
+      <img :src="userImage" alt="Администратор" width="40" height="40" />
     </a>
 
-    <div class="header__menu">
+    <div
+      v-if="isUserMenuOpened"
+      v-click-outside="toggleUserMenu"
+      class="header__menu"
+    >
       <div class="user-menu">
-        <img
-          src="@/assets/img/admin.jpg"
-          width="56"
-          height="56"
-          alt="Администратор"
-        />
-        <span>Администратор</span>
-        <a href="#" class="user-menu__link">Мой аккаунт</a>
-        <a href="#" class="user-menu__link">Выйти</a>
+        <img :src="userImage" width="56" height="56" alt="Администратор" />
+        <span>{{ authStore.user.name }}</span>
+        <a href="#" class="user-menu__link" @click="logout">Выйти</a>
       </div>
     </div>
+    <a
+      v-if="!authStore.isAuthenticated"
+      class="header__login"
+      @click="() => $router.push('/login')"
+    >
+      Войти
+    </a>
   </header>
 </template>
 
 <script setup>
-import { useFiltersStore } from "@/stores";
+import { ref } from "vue";
+import { useFiltersStore, useAuthStore } from "@/stores";
+import { getPublicImage } from "@/common/helpers";
 
+const authStore = useAuthStore();
 const filtersStore = useFiltersStore();
+
+const isUserMenuOpened = ref(false);
+const userImage = getPublicImage(authStore.user?.avatar);
+
+function toggleUserMenu() {
+  isUserMenuOpened.value = !isUserMenuOpened.value;
+}
+
+function logout() {
+  authStore.logout();
+  isUserMenuOpened.value = false;
+}
 </script>
 
 <style lang="scss" scoped>
