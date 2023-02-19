@@ -6,21 +6,21 @@
         v-if="!modelValue"
         type="button"
         class="task-card__link"
-        @click.stop="isMenuOpened = !isMenuOpened"
+        @click.stop="() => (isMenuOpened = !isMenuOpened)"
       >
         добавить пользователя
       </button>
       <button v-else class="users-list__user">
         <img
-          :src="getImage(currentWorker.avatar)"
-          @click.stop="isMenuOpened = !isMenuOpened"
+          :src="getPublicImage(currentWorker.avatar)"
+          @click.stop="() => (isMenuOpened = !isMenuOpened)"
         />
-        <span @click.stop="isMenuOpened = !isMenuOpened">
+        <span @click.stop="() => (isMenuOpened = !isMenuOpened)">
           {{ currentWorker.name }}
         </span>
         <app-icon
           class="icon--trash users-list__icon"
-          @click="$emit('update:modelValue', null)"
+          @click="() => $emit('update:modelValue', null)"
         />
       </button>
       <div class="task-card__users">
@@ -29,9 +29,9 @@
           v-click-outside="hideUserMenu"
           class="users-list"
         >
-          <li v-for="user in users" :key="user.id">
-            <button class="users-list__user" @click="setUser(user.id)">
-              <img :src="getImage(user.avatar)" />
+          <li v-for="user in usersStore.users" :key="user.id">
+            <button class="users-list__user" @click="() => setUser(user.id)">
+              <img :src="getPublicImage(user.avatar)" />
               <span>{{ user.name }}</span>
             </button>
           </li>
@@ -42,10 +42,12 @@
 </template>
 
 <script setup>
-import users from "@/mocks/users.json";
 import { ref, computed } from "vue";
-import { getImage } from "../../../common/helpers";
+import { getPublicImage } from "@/common/helpers";
+import { useUsersStore } from "@/stores";
 import AppIcon from "@/common/components/AppIcon.vue";
+
+const usersStore = useUsersStore();
 
 const props = defineProps({
   modelValue: {
@@ -53,12 +55,13 @@ const props = defineProps({
     default: null,
   },
 });
+
 const emits = defineEmits(["update:modelValue"]);
 
 const isMenuOpened = ref(false);
 
 const currentWorker = computed(() =>
-  users.find(({ id }) => id === props.modelValue)
+  usersStore.users.find(({ id }) => id === props.modelValue)
 );
 
 function setUser(id) {

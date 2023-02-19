@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
-import tasks from "@/mocks/tasks.json";
-import { normalizeTask } from "../common/helpers";
-import { useFiltersStore } from "@/stores/filters";
-import { useUsersStore } from "@/stores/users";
+import { useUsersStore, useFiltersStore } from "@/stores";
+import { tasksService } from "@/services";
 
 export const useTasksStore = defineStore("tasks", {
   state: () => ({
@@ -58,42 +56,42 @@ export const useTasksStore = defineStore("tasks", {
   },
   actions: {
     async fetchTasks() {
-      this.tasks = tasks.map((task) => normalizeTask(task));
+      this.tasks = await tasksService.fetchTasks();
     },
     updateTasks(tasksToUpdate) {
-      tasksToUpdate.forEach((task) => {
+      tasksToUpdate.forEach(async (task) => {
         const index = this.tasks.findIndex(({ id }) => id === task.id);
 
         if (~index) {
+          await tasksService.updateTask(task);
           this.tasks.splice(index, 1, task);
         }
       });
     },
-    addTask(task) {
-      const newTask = normalizeTask(task);
-      newTask.id = this.tasks.length + 1;
-      newTask.sortOrder = this.tasks.filter((task) => !task.columnId).length;
+    async addTask(task) {
+      task.sortOrder = this.tasks.filter((task) => !task.columnId).length;
 
-      if (newTask.userId) {
-        newTask.user = { ...this.getTaskUserById(newTask.userId) };
-      }
-
+      const newTask = await tasksService.createTask(task);
       this.tasks = [...this.tasks, newTask];
+
+      return newTask;
     },
-    editTask(task) {
-      const index = this.tasks.findIndex(({ id }) => task.id === id);
+    async editTask(task) {
+      const newTask = await tasksService.updateTask(task);
+      const index = this.tasks.findIndex(({ id }) => newTask.id === id);
 
       if (~index) {
-        const newTask = normalizeTask(task);
-
         if (newTask.userId) {
           newTask.user = { ...this.getTaskUserById(newTask.userId) };
         }
-
         this.tasks.splice(index, 1, newTask);
       }
+
+      return newTask;
     },
-    deleteTask(id) {
+    async deleteTask(id) {
+      await tasksService.deleteTask(id);
+
       this.tasks = this.tasks.filter((task) => task.id !== id);
     },
   },

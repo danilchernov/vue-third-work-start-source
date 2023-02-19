@@ -1,11 +1,9 @@
 <template>
-  <!--  Отслеживает в какую колонку передана задача-->
   <app-drop
     class="backlog"
     :class="{ 'backlog--hide': state.backlogIsHidden }"
     @drop="moveTask"
   >
-    <!--  Отвечает за открытие/закрытие беклога-->
     <button
       class="backlog__title"
       @click="() => (state.backlogIsHidden = !state.backlogIsHidden)"
@@ -19,7 +17,7 @@
           <div class="backlog__user">
             <div class="backlog__account">
               <img
-                src="@/assets/img/user6.jpg"
+                :src="getPublicImage(authStore.user.avatar)"
                 alt="Ваш аватар"
                 width="32"
                 height="32"
@@ -34,7 +32,7 @@
 
           <div class="backlog__target-area">
             <!--  Задачи в беклоге-->
-            <task-card
+            <TaskCard
               v-for="task in tasksStore.sidebarTasks"
               :key="task.id"
               :task="task"
@@ -51,14 +49,19 @@
 <script setup>
 import { reactive } from "vue";
 
-import { useTasksStore } from "@/stores";
+import {
+  getTargetColumnTasks,
+  addActive,
+  getPublicImage,
+} from "@/common/helpers";
+
+import { useTasksStore, useAuthStore } from "@/stores";
 
 import AppDrop from "@/common/components/AppDrop.vue";
 import TaskCard from "@/modules/tasks/components/TaskCard.vue";
 
-import { getTargetColumnTasks, addActive } from "@/common/helpers";
-
 const tasksStore = useTasksStore();
+const authStore = useAuthStore();
 
 const state = reactive({ backlogIsHidden: false });
 

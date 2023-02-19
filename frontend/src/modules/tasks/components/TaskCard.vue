@@ -1,17 +1,17 @@
 <template>
   <app-drop @drop="$emit('drop', $event)">
     <app-drag :transfer-data="task">
-      <div class="task" @click="router.push({ path: `/${task.id}` })">
-        <div v-if="task.user" class="task__user">
+      <div class="task" @click="() => router.push({ path: `/${task.id}` })">
+        <div v-if="taskUser" class="task__user">
           <div class="task__avatar">
             <img
-              :src="getImage(task.user.avatar)"
+              :src="getPublicImage(taskUser.avatar)"
               alt="Аватар пользователя"
               width="20"
               height="20"
             />
           </div>
-          {{ task.user.name }}
+          {{ taskUser.name }}
         </div>
         <div class="task__statuses">
           <span
@@ -38,13 +38,18 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useRouter } from "vue-router";
+
+import { getPublicImage } from "@/common/helpers";
+import { useUsersStore } from "@/stores";
 
 import AppDrag from "@/common/components/AppDrag.vue";
 import AppDrop from "@/common/components/AppDrop.vue";
 import TaskCardTags from "./TaskCardTags.vue";
 
-import { getImage } from "@/common/helpers";
+const router = useRouter();
+const usersStore = useUsersStore();
 
 const props = defineProps({
   task: {
@@ -55,7 +60,9 @@ const props = defineProps({
 
 defineEmits(["drop"]);
 
-const router = useRouter();
+const taskUser = computed(() => {
+  return usersStore.users.find((user) => user.id === props.task.userId);
+});
 </script>
 
 <style lang="scss" scoped>
