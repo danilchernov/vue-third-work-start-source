@@ -1,7 +1,7 @@
 <template>
   <app-drop class="column" @drop="moveTask">
     <h2 class="column__name">
-      <span v-if="!state.isInputShowed">
+      <span v-if="!state.isInputShowed" data-test="desk-column-title">
         {{ state.columnTitle }}
       </span>
 
@@ -27,7 +27,7 @@
       />
     </h2>
 
-    <div class="column__target-area">
+    <div class="column__target-area" data-test="column-target-area">
       <transition-group name="tasks">
         <div v-for="task in columnTasks" :key="task.id">
           <task-card
@@ -35,7 +35,7 @@
             class="column__task"
             @drop="moveTask($event, task)"
           />
-        </div>
+      </div>
       </transition-group>
     </div>
   </app-drop>
